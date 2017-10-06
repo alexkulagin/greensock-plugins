@@ -22,7 +22,7 @@
  * date: 06.10.2017
  * @author: alexkulagin.com
  **/
- 
+
 
 	var _gsScope = (typeof(module) !== 'undefined' && module.exports && typeof(global) !== 'undefined') ? global : this || window;
 
@@ -33,10 +33,29 @@
 		_gsScope._gsDefine.plugin(
 		{
 			propName: 'BlindPlugin',
-			priority: 0, 
+			priority: -1, 
 			API: 2, 
-			version: '1.0'
+			version: '1.0',
 
+			init: function(target, value, tween, index)
+			{
+				if (!target.nodeType) { return false };
+
+				// default options
+				var options = {
+					origin: '0 0',
+					width: null, height: null
+				};
+
+				// initial options
+				for (var prop in value) {
+					options[prop] = value[prop];
+				}
+
+				var origin = (options.origin || '0 0') + '',
+					a = origin.split(' '),
+					l = a.lengt;
+			}
 		});
 
 	}); if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()() }
