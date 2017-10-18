@@ -21,7 +21,7 @@
  *
  * GSAP BlindPlugin
  * version: 1.0
- * date: 08.10.2017
+ * date: 18.10.2017
  * @author: alexkulagin.com
  * 
  **/
@@ -73,26 +73,40 @@
 					originLength = origin.length;
 
 
-				// max width & max height
-				var	maxWidth = options.width || Math.max(target.scrollWidth, target.clientWidth),
-					maxHeight = options.height || Math.max(target.scrollHeight, target.clientHeight);
+				// base width and height
+				var	baseWidth = options.width || Math.max(target.scrollWidth, target.clientWidth),
+					baseHeight = options.height || Math.max(target.scrollHeight, target.clientHeight);
 
 				
 				// calculation horizontal and vertical offset
 				var	h_offset = 0,
 					v_offset = 0;
 
-				if (l === 1 && origin.indexOf('center') !== -1) {
+				if (originLength === 1 && origin.indexOf('center') !== -1) {
 					h_offset = v_offset = 0.5;
 				} 
 
-				else if (l === 1 || l === 2) {
+				else if (originLength === 1 || originLength === 2) {
 					h_offset = origin.indexOf('left') !== -1 ? 0 : origin.indexOf('right') !== -1 ? 1 : origin[0];
 					v_offset = origin.indexOf('top') !== -1 ? 0 : origin.indexOf('bottom') !== -1 ? 1 : origin[1];
 				}
 
-				h_offset = (Math.abs(h_offset) > 1) ? h_offset / maxWidth : h_offset;
-				v_offset = (Math.abs(v_offset) > 1) ? v_offset / maxHeight : v_offset;
+				h_offset = (Math.abs(h_offset) > 1) ? h_offset / baseWidth : h_offset;
+				v_offset = (Math.abs(v_offset) > 1) ? v_offset / baseHeight : v_offset;
+
+
+				// end points
+				var css = tween.vars.css,
+					endWidth = css.width || 0,
+					endHeight = css.height || 0,
+					endX = (Math.abs(h_offset) > 0) ? (baseWidth * h_offset) - (endWidth * h_offset) : 0,
+					endY = (Math.abs(v_offset) > 0) ? (baseHeight * v_offset) - (endHeight * v_offset) : 0;
+
+
+				// apply tween properties
+				css.x = Math.abs(css.x) >= 0 ? css.x + endX : endX;
+				css.y = Math.abs(css.y) >= 0 ? css.y + endY : endY;
+
 			}
 		});
 
@@ -100,7 +114,8 @@
 
 
 
-	// plugin export
+	/* plugin export */
+
 	!(function(name) {
 		'use strict';
 		var getGlobal = function() { return (_gsScope.GreenSockGlobals || _gsScope)[name] };
