@@ -21,7 +21,8 @@
  *
  * GSAP BlindPlugin
  * version: 1.0
- * date: 18.10.2017
+ * update: 22.10.2017
+ * github: https://github.com/alexkulagin/greensock-plugins/tree/master/BlindPlugin
  * @author: alexkulagin.com
  * 
  **/
