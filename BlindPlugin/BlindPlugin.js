@@ -20,7 +20,7 @@
  ║
  *
  * GSAP BlindPlugin
- * version: 1.0
+ * version: 1.1
  * update: 22.10.2017
  * github: https://github.com/alexkulagin/greensock-plugins/tree/master/BlindPlugin
  * @author: alexkulagin.com
@@ -39,7 +39,7 @@
 			propName: 'blind',
 			priority: -1, 
 			API: 2, 
-			version: '1.0',
+			version: '1.1',
 
 			
 			init: function(target, value, tween, index)
@@ -60,10 +60,12 @@
 					options[prop] = value[prop];
 				}
 
+				
+				var targetStyle = document.defaultView.getComputedStyle(target, null),
+					tweencss = tween.vars.css;
+
 
 				// setup overflow hidden
-				var targetStyle = document.defaultView.getComputedStyle(target, null);
-
 				if (targetStyle.overflow !== 'hidden') {
 					target.style.setProperty('overflow', 'hidden'/*, 'important'*/);
 				}
@@ -85,9 +87,9 @@
 
 				if (originLength === 1 && origin.indexOf('center') !== -1) {
 					h_offset = v_offset = 0.5;
-				} 
+				}
 
-				else if (originLength === 1 || originLength === 2) {
+				else if (originLength === 2) {
 					h_offset = origin.indexOf('left') !== -1 ? 0 : origin.indexOf('right') !== -1 ? 1 : origin[0];
 					v_offset = origin.indexOf('top') !== -1 ? 0 : origin.indexOf('bottom') !== -1 ? 1 : origin[1];
 				}
@@ -97,16 +99,15 @@
 
 
 				// end points
-				var css = tween.vars.css,
-					endWidth = css.width || 0,
-					endHeight = css.height || 0,
+				var endWidth = tweencss.width || 0,
+					endHeight = tweencss.height || 0,
 					endX = (Math.abs(h_offset) > 0) ? (baseWidth * h_offset) - (endWidth * h_offset) : 0,
 					endY = (Math.abs(v_offset) > 0) ? (baseHeight * v_offset) - (endHeight * v_offset) : 0;
 
 
 				// apply tween properties
-				css.x = Math.abs(css.x) >= 0 ? css.x + endX : endX;
-				css.y = Math.abs(css.y) >= 0 ? css.y + endY : endY;
+				tweencss.x = Math.abs(tweencss.x) > 0 ? tweencss.x + endX : endX;
+				tweencss.y = Math.abs(tweencss.y) > 0 ? tweencss.y + endY : endY;
 
 			}
 		});
