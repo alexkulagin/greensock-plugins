@@ -20,8 +20,8 @@
  ║
  *
  * GSAP BlindPlugin
- * version: 1.1
- * update: 22.10.2017
+ * version: 1.2
+ * update: 24.10.2017
  * github: https://github.com/alexkulagin/greensock-plugins/tree/master/BlindPlugin
  * @author: alexkulagin.com
  * 
@@ -34,12 +34,78 @@
 		
 		'use strict';
 		
+		
+		const _getTranslateRatio = function (pivot)
+		{
+			var origin, first, _first, second, _second, 
+				l, r, t, b, c, vRatio, hRatio;
+
+			origin = pivot.split(' ');
+
+			first = origin[0];
+			second = origin[1];
+
+			_first = first;
+			_second = second;
+
+			l = origin.indexOf('left');
+			r = origin.indexOf('right');
+			t = origin.indexOf('top');
+			b = origin.indexOf('bottom');
+			c = origin.indexOf('center');
+
+			vRatio = null; // vertical translate ratio
+			hRatio = null; // horizontal translate ratio
+
+
+			// single direction
+			if (!second)
+			{
+				if (c !== -1) {
+					vRatio = hRatio = 0.5;
+				}
+
+				else {
+					vRatio = (t >= 0) ? 0 : (b >= 0) ? 1 : null;
+					hRatio = (l >= 0) ? 0 : (r >= 0) ? 1 : null;	
+				}
+			}
+
+
+			// multi direction
+			else if (second)
+			{
+				// numbers & number with center [v,h] 
+				if (l < 0 && r < 0 && t < 0 && b < 0) {
+					vRatio = (first === 'center') ? 0.5 : null;
+					hRatio = (second === 'center') ? 0.5 : null;
+				}
+
+				// [v,h]
+				else 
+				{
+					// [h,v]
+					if ((t == 1 && b == 1) || (l == 0 || r == 0)) {
+						_first = second; 
+						_second = first;
+					}
+
+					vRatio = (_first === 'top') ? 0 : (_first === 'bottom') ? 1 : (_first === 'center') ? 0.5 : null;
+					hRatio = (_second === 'left') ? 0 : (_second === 'right') ? 1 : (_second === 'center') ? 0.5 : null;
+					
+				}
+			}
+
+			return { v: vRatio, h: hRatio };
+		};
+
+
 		_gsScope._gsDefine.plugin(
 		{
 			propName: 'blind',
 			priority: -1, 
 			API: 2, 
-			version: '1.1',
+			version: '1.2',
 
 			
 			init: function(target, value, tween, index)
@@ -71,28 +137,16 @@
 				}
 
 
-				// blind origin
-				var origin = ((options.origin || '0 0') + '').split(' '),
-					originLength = origin.length;
+				// horizontal & vertical translate ratio
+				var tr = _getTranslateRatio(options.origin),
+					h_offset = tr.h,
+					v_offset = tr.v;
 
 
 				// base width and height
 				var	baseWidth = options.width || Math.max(target.scrollWidth, target.clientWidth),
 					baseHeight = options.height || Math.max(target.scrollHeight, target.clientHeight);
 
-				
-				// calculation horizontal and vertical offset
-				var	h_offset = 0,
-					v_offset = 0;
-
-				if (originLength === 1 && origin.indexOf('center') !== -1) {
-					h_offset = v_offset = 0.5;
-				}
-
-				else if (originLength === 2) {
-					h_offset = origin.indexOf('left') !== -1 ? 0 : origin.indexOf('right') !== -1 ? 1 : origin[0];
-					v_offset = origin.indexOf('top') !== -1 ? 0 : origin.indexOf('bottom') !== -1 ? 1 : origin[1];
-				}
 
 				h_offset = (Math.abs(h_offset) > 1) ? h_offset / baseWidth : h_offset;
 				v_offset = (Math.abs(v_offset) > 1) ? v_offset / baseHeight : v_offset;
@@ -124,3 +178,6 @@
 		/* node */ if (typeof(module) !== 'undefined' && module.exports) { require('../TweenLite.js'); module.exports = getGlobal() } 
 		/* amd  */ else if (typeof(define) === 'function' && define.amd) { define(['TweenLite'], getGlobal) }
 	}('BlindPlugin'));
+
+
+
