@@ -20,8 +20,8 @@
  ║
  *
  * GSAP BlindPlugin
- * version: 1.2
- * update: 24.10.2017
+ * version: 1.3
+ * update: 25.10.2017
  * github: https://github.com/alexkulagin/greensock-plugins/tree/master/BlindPlugin
  * @author: alexkulagin.com
  * 
@@ -34,19 +34,26 @@
 		
 		'use strict';
 		
+		// UTILS
+		const _error = function (err) { throw new Error(err) };
+		const _isNumber = function (n) { return !isNaN(parseFloat(n)) && isFinite(n) };
 		
+
+		// HELPERS
 		const _getTranslateRatio = function (pivot)
 		{
+			if (!(typeof pivot === 'string' || pivot instanceof String)) {
+				_error('origin must be a string!' + ' ' + pivot + ' is not string!');
+			}
+
 			var origin, first, _first, second, _second, 
 				l, r, t, b, c, vRatio, hRatio;
 
-			origin = pivot.split(' ');
+			
+			origin = pivot.replace(/ +(?= )/g,'').trim().split(' ');
 
-			first = origin[0];
-			second = origin[1];
-
-			_first = first;
-			_second = second;
+			first = _first = origin[0];
+			second = _second = origin[1];
 
 			l = origin.indexOf('left');
 			r = origin.indexOf('right');
@@ -54,8 +61,9 @@
 			b = origin.indexOf('bottom');
 			c = origin.indexOf('center');
 
-			vRatio = null; // vertical translate ratio
-			hRatio = null; // horizontal translate ratio
+
+			// vertical & horizontal translate ratio
+			vRatio = hRatio = null;
 
 
 			// single direction
@@ -63,6 +71,10 @@
 			{
 				if (c !== -1) {
 					vRatio = hRatio = 0.5;
+				}
+
+				else if (_isNumber(first)) {
+					vRatio = hRatio = first;
 				}
 
 				else {
@@ -77,8 +89,8 @@
 			{
 				// numbers & number with center [v,h] 
 				if (l < 0 && r < 0 && t < 0 && b < 0) {
-					vRatio = (first === 'center') ? 0.5 : null;
-					hRatio = (second === 'center') ? 0.5 : null;
+					vRatio = (first === 'center') ? 0.5 : _isNumber(first) ? first : null;
+					hRatio = (second === 'center') ? 0.5 : _isNumber(second) ? second : null;
 				}
 
 				// [v,h]
@@ -90,8 +102,8 @@
 						_second = first;
 					}
 
-					vRatio = (_first === 'top') ? 0 : (_first === 'bottom') ? 1 : (_first === 'center') ? 0.5 : null;
-					hRatio = (_second === 'left') ? 0 : (_second === 'right') ? 1 : (_second === 'center') ? 0.5 : null;
+					vRatio = (_first === 'top') ? 0 : (_first === 'bottom') ? 1 : (_first === 'center') ? 0.5 : _isNumber(_first) ? _first : null;
+					hRatio = (_second === 'left') ? 0 : (_second === 'right') ? 1 : (_second === 'center') ? 0.5 : _isNumber(_second) ? _second : null;
 					
 				}
 			}
@@ -105,7 +117,7 @@
 			propName: 'blind',
 			priority: -1, 
 			API: 2, 
-			version: '1.2',
+			version: '1.3',
 
 			
 			init: function(target, value, tween, index)
