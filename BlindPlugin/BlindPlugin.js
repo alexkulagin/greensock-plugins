@@ -20,8 +20,8 @@
  ║
  *
  * GSAP BlindPlugin
- * version: 1.3
- * update: 25.10.2017
+ * version: 1.4
+ * update: 26.10.2017
  * github: https://github.com/alexkulagin/greensock-plugins/tree/master/BlindPlugin
  * @author: alexkulagin.com
  * 
@@ -46,14 +46,14 @@
 				_error('origin must be a string!' + ' ' + pivot + ' is not string!');
 			}
 
-			var origin, first, _first, second, _second, 
-				l, r, t, b, c, vRatio, hRatio;
+			var origin, first, second, _f, _s, 
+				l, r, t, b, c, vr, hr;
 
-			
+
 			origin = pivot.replace(/ +(?= )/g,'').trim().split(' ');
 
-			first = _first = origin[0];
-			second = _second = origin[1];
+			_f = first = origin[0];
+			_s = second = origin[1];
 
 			l = origin.indexOf('left');
 			r = origin.indexOf('right');
@@ -63,23 +63,23 @@
 
 
 			// vertical & horizontal translate ratio
-			vRatio = hRatio = null;
+			vr = hr = null;
 
 
 			// single direction
 			if (!second)
 			{
 				if (c !== -1) {
-					vRatio = hRatio = 0.5;
+					vr = hr = 0.5;
 				}
 
 				else if (_isNumber(first)) {
-					vRatio = hRatio = first;
+					vr = hr = first;
 				}
 
 				else {
-					vRatio = (t >= 0) ? 0 : (b >= 0) ? 1 : null;
-					hRatio = (l >= 0) ? 0 : (r >= 0) ? 1 : null;	
+					vr = (t >= 0) ? 0 : (b >= 0) ? 1 : null;
+					hr = (l >= 0) ? 0 : (r >= 0) ? 1 : null;	
 				}
 			}
 
@@ -89,26 +89,34 @@
 			{
 				// numbers & number with center [v,h] 
 				if (l < 0 && r < 0 && t < 0 && b < 0) {
-					vRatio = (first === 'center') ? 0.5 : _isNumber(first) ? first : null;
-					hRatio = (second === 'center') ? 0.5 : _isNumber(second) ? second : null;
+					vr = (first === 'center') ? 0.5 : _isNumber(first) ? first : null;
+					hr = (second === 'center') ? 0.5 : _isNumber(second) ? second : null;
 				}
 
 				// [v,h]
 				else 
 				{
-					// [h,v]
-					if ((t == 1 && b == 1) || (l == 0 || r == 0)) {
-						_first = second; 
-						_second = first;
+					if ((first == second) || ((first == 'top' || first == 'bottom') && (second == 'top' || second == 'bottom')) || ((first == 'left' || first == 'right') && (second == 'left' || second == 'right'))) {
+						_error('origin must be correct!');
 					}
 
-					vRatio = (_first === 'top') ? 0 : (_first === 'bottom') ? 1 : (_first === 'center') ? 0.5 : _isNumber(_first) ? _first : null;
-					hRatio = (_second === 'left') ? 0 : (_second === 'right') ? 1 : (_second === 'center') ? 0.5 : _isNumber(_second) ? _second : null;
+					// [h,v]
+					if ((t == 1 && b == 1) || (l == 0 || r == 0)) {
+						_f = second; 
+						_s = first;
+					}
+
+					vr = (_f === 'top') ? 0 : (_f === 'bottom') ? 1 : (_f === 'center') ? 0.5 : _isNumber(_f) ? _f : null;
+					hr = (_s === 'left') ? 0 : (_s === 'right') ? 1 : (_s === 'center') ? 0.5 : _isNumber(_s) ? _s : null;
 					
 				}
 			}
 
-			return { v: vRatio, h: hRatio };
+			if (vr == null && hr == null) {
+				_error('origin must be correct!');
+			}
+
+			return { v: vr, h: hr };
 		};
 
 
@@ -117,7 +125,7 @@
 			propName: 'blind',
 			priority: -1, 
 			API: 2, 
-			version: '1.3',
+			version: '1.4',
 
 			
 			init: function(target, value, tween, index)
