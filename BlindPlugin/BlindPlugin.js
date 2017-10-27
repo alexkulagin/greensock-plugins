@@ -20,8 +20,8 @@
  ║
  *
  * GSAP BlindPlugin
- * version: 1.4
- * update: 26.10.2017
+ * version: 1.5
+ * update: 27.10.2017
  * github: https://github.com/alexkulagin/greensock-plugins/tree/master/BlindPlugin
  * @author: alexkulagin.com
  * 
@@ -36,6 +36,7 @@
 		
 		// UTILS
 		const _error = function (err) { throw new Error(err) };
+		const _extend = function (a,b) { for (var i in b) { a[i] = b[i] } return a };
 		const _isNumber = function (n) { return !isNaN(parseFloat(n)) && isFinite(n) };
 		
 
@@ -120,12 +121,13 @@
 		};
 
 
+		// PLUGIN
 		_gsScope._gsDefine.plugin(
 		{
 			propName: 'blind',
 			priority: -1, 
 			API: 2, 
-			version: '1.4',
+			version: '1.5',
 
 			
 			init: function(target, value, tween, index)
@@ -133,56 +135,58 @@
 				// only for dom elements
 				if (!target.nodeType) { return false };
 
+				var targetStyle = document.defaultView.getComputedStyle(target, null);
 
-				// default options
-				var options = {
-					origin: '0 0',
-					width: null, height: null
-				};
-
-
-				// initial options
-				for (var prop in value) {
-					options[prop] = value[prop];
-				}
-
-				
-				var targetStyle = document.defaultView.getComputedStyle(target, null),
-					tweencss = tween.vars.css;
-
-
-				// setup overflow hidden
-				if (targetStyle.overflow !== 'hidden') {
+				// setup hidden overflow
+				if (targetStyle.overflow != 'hidden') {
 					target.style.setProperty('overflow', 'hidden'/*, 'important'*/);
 				}
 
+				// default options
+				var defaultOptions = { size: 0, origin: '0 0' };
+
+				// initial options
+				var options = _extend(defaultOptions, value),
+					vars = tween.vars.css;
 
 				// horizontal & vertical translate ratio
 				var tr = _getTranslateRatio(options.origin),
-					h_offset = tr.h,
-					v_offset = tr.v;
+					hr = tr.h !== null ? Math.abs(tr.h) : null,
+					vr = tr.v !== null ? Math.abs(tr.v) : null;
+
+				var size = options.size || 0, 
+					maxWidth, maxHeight,
+					minWidth, minHeight,
+					endWidth, endHeight,
+					endX, endY;
 
 
-				// base width and height
-				var	baseWidth = options.width || Math.max(target.scrollWidth, target.clientWidth),
-					baseHeight = options.height || Math.max(target.scrollHeight, target.clientHeight);
+				if (hr !== null) 
+				{
+					maxWidth = options.maxWidth || target.scrollWidth;
+					minWidth = options.minWidth || 0;
+
+					endWidth = vars.width || (maxWidth - minWidth) * size + minWidth;
+					endX = (hr > 0) ? (maxWidth * hr) - (endWidth * hr) : 0;
+
+					vars.x = (vars.x && vars.x !== 0) ? vars.x + endX : endX;
+					vars.width = endWidth;
+				}
 
 
-				h_offset = (Math.abs(h_offset) > 1) ? h_offset / baseWidth : h_offset;
-				v_offset = (Math.abs(v_offset) > 1) ? v_offset / baseHeight : v_offset;
+				if (vr !== null) 
+				{
+					maxHeight = options.maxHeight || target.scrollHeight;
+					minHeight = options.minHeight || 0;
 
+					endHeight = vars.height || (maxHeight - minHeight) * size + minHeight;
+					endY = (vr > 0) ? (maxHeight * vr) - (endHeight * vr) : 0;
 
-				// end points
-				var endWidth = tweencss.width || 0,
-					endHeight = tweencss.height || 0,
-					endX = (Math.abs(h_offset) > 0) ? (baseWidth * h_offset) - (endWidth * h_offset) : 0,
-					endY = (Math.abs(v_offset) > 0) ? (baseHeight * v_offset) - (endHeight * v_offset) : 0;
+					vars.y = (vars.y && vars.y !== 0) ? vars.y + endY : endY;
+					vars.height = endHeight;
+				}
 
-
-				// apply tween properties
-				tweencss.x = Math.abs(tweencss.x) > 0 ? tweencss.x + endX : endX;
-				tweencss.y = Math.abs(tweencss.y) > 0 ? tweencss.y + endY : endY;
-
+				return true;
 			}
 		});
 
